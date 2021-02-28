@@ -27,129 +27,6 @@ version=N.NN
 ##                                                                     ##
 #########################################################################
 ##
-##  HELP TEXT
-##
-##  Defines the output of 'pdfjam --help'
-##
-helptext="
-insert contents of pdfjam-help.txt here
-"
-##
-##  END OF HELP TEXT
-##
-#########################################################################
-##
-##  PRELIMINARIES
-##
-##  First determine:
-##    --- whether verbose commentary should be provided (not if --quiet 
-#         or --configpath was specified); 
-##    --- whether this call to pdfjam is a "batch" call; 
-##    --- whether just the help text is required; 
-##    --- or whether all configuration files should be ignored.
-##
-verbose=true
-for arg
-do
-    case $arg in
-	--quiet | -q | --configpath)
-	    verbose=false ;
-	    ;;
-	--version | -V)
-	    echo "$version"
-	    exit 0 ;
-	    ;;
-	--batch)
-	    batch=true ;
-	    ;;
-	--help | -u | -h)
-		printf "%s\n" "$helptext" ;
-		exit 0 ;
-	    ;;
-	--vanilla)
-	    vanilla=true ;
-	    ;;
-	*)
-	    ;;
-    esac
-done
-##
-##  Check to see whether this is a "secondary" call to pdfjam:
-##
-if test -z "$PDFJAM_CALL_NUMBER"  ## not a secondary call
-then
-    PDFJAM_CALL_NUMBER=0
-fi
-##
-##  Keep a copy of the internal file separator, so we can change it safely
-##
-OIFS="$IFS"
-##
-##  Record the full filename of the current working diractory
-##
-pwd=$(pwd)
-##
-##  Trap interrupts so that they kill everything:
-##
-trap 'IFS=$OIFS; exit 1' 1 2 15
-##
-##  The following will be useful for readability of the script:
-##
-newline='
-'
-##
-##  Define a function to escape tricky characters in file names etc:
-##
-escape_chars () {
-    (printf "%s" "${1}" | sed 's/[^a-zA-Z0-9._/\-]/\\&/g')
-}
-##
-##  Define a function to output verbose comments:
-##
-prattle () { ## second argument here is non-null for continuation lines
-    if test $verbose = true; then
-	prefix1="  pdfjam:" ;
-	prefix2=$(printf "%s" "$prefix1" | sed 's/pdfjam:/       /') ;
-	indent="" ;
-	if test "$PDFJAM_CALL_NUMBER" -gt 0  &&
-	    test "$batch" != true
-	then
-	    indent="    "
-	fi
-	IFS="$newline" ;
-	lineCounter=0 ;
-	for line in ${1}
-	do
-	    lineCounter=$((lineCounter + 1)) ;
-	    if  test $lineCounter -eq 1  &&  test ! -n "${2}" ;
-	    then 
-		if test -w "$PDFJAM_MESSAGES_FILE"
-		then printf "$prefix1$indent %s\n" "$line" 1>/dev/null >> \
-                       "$PDFJAM_MESSAGES_FILE"
-		else messages="$messages$prefix1$indent $line$newline"  
-                       ## msg file not made yet
-		fi
-	    else 
-		if test -w "$PDFJAM_MESSAGES_FILE"
-		then printf "$prefix2$indent %s\n" "$line" 1>/dev/null >> \
-                       "$PDFJAM_MESSAGES_FILE"
-		else messages="$messages$prefix2$indent $line$newline"  
-                       ## msg file not made yet
-		fi
-	    fi ;
-	done ;
-	IFS="$OIFS" ;
-    fi ;
-    return ;
-}
-##
-##  And here's the first piece of verbose commentary:
-##
-prattle "----" 1
-prattle "This is pdfjam version ${version}."
-##
-#########################################################################
-##
 ##  CONFIGURATION
 ##
 ##  THESE SETTINGS WILL BE OVER-RIDDEN by any found in configuration
@@ -271,6 +148,129 @@ fi
 if [ -n "${pdflatex:-}" ] ; then latex="$pdflatex" ; fi
 ##
 ##  END OF CONFIGURATION BLOCK
+##
+#########################################################################
+##
+##  HELP TEXT
+##
+##  Defines the output of 'pdfjam --help'
+##
+helptext="
+insert contents of pdfjam-help.txt here
+"
+##
+##  END OF HELP TEXT
+##
+#########################################################################
+##
+##  PRELIMINARIES
+##
+##  First determine:
+##    --- whether verbose commentary should be provided (not if --quiet 
+#         or --configpath was specified); 
+##    --- whether this call to pdfjam is a "batch" call; 
+##    --- whether just the help text is required; 
+##    --- or whether all configuration files should be ignored.
+##
+verbose=true
+for arg
+do
+    case $arg in
+	--quiet | -q | --configpath)
+	    verbose=false ;
+	    ;;
+	--version | -V)
+	    echo "$version"
+	    exit 0 ;
+	    ;;
+	--batch)
+	    batch=true ;
+	    ;;
+	--help | -u | -h)
+		printf "%s\n" "$helptext" ;
+		exit 0 ;
+	    ;;
+	--vanilla)
+	    vanilla=true ;
+	    ;;
+	*)
+	    ;;
+    esac
+done
+##
+##  Check to see whether this is a "secondary" call to pdfjam:
+##
+if test -z "$PDFJAM_CALL_NUMBER"  ## not a secondary call
+then
+    PDFJAM_CALL_NUMBER=0
+fi
+##
+##  Keep a copy of the internal file separator, so we can change it safely
+##
+OIFS="$IFS"
+##
+##  Record the full filename of the current working diractory
+##
+pwd=$(pwd)
+##
+##  Trap interrupts so that they kill everything:
+##
+trap 'IFS=$OIFS; exit 1' 1 2 15
+##
+##  The following will be useful for readability of the script:
+##
+newline='
+'
+##
+##  Define a function to escape tricky characters in file names etc:
+##
+escape_chars () {
+    (printf "%s" "${1}" | sed 's/[^a-zA-Z0-9._/\-]/\\&/g')
+}
+##
+##  Define a function to output verbose comments:
+##
+prattle () { ## second argument here is non-null for continuation lines
+    if test $verbose = true; then
+	prefix1="  pdfjam:" ;
+	prefix2=$(printf "%s" "$prefix1" | sed 's/pdfjam:/       /') ;
+	indent="" ;
+	if test "$PDFJAM_CALL_NUMBER" -gt 0  &&
+	    test "$batch" != true
+	then
+	    indent="    "
+	fi
+	IFS="$newline" ;
+	lineCounter=0 ;
+	for line in ${1}
+	do
+	    lineCounter=$((lineCounter + 1)) ;
+	    if  test $lineCounter -eq 1  &&  test ! -n "${2}" ;
+	    then 
+		if test -w "$PDFJAM_MESSAGES_FILE"
+		then printf "$prefix1$indent %s\n" "$line" 1>/dev/null >> \
+                       "$PDFJAM_MESSAGES_FILE"
+		else messages="$messages$prefix1$indent $line$newline"  
+                       ## msg file not made yet
+		fi
+	    else 
+		if test -w "$PDFJAM_MESSAGES_FILE"
+		then printf "$prefix2$indent %s\n" "$line" 1>/dev/null >> \
+                       "$PDFJAM_MESSAGES_FILE"
+		else messages="$messages$prefix2$indent $line$newline"  
+                       ## msg file not made yet
+		fi
+	    fi ;
+	done ;
+	IFS="$OIFS" ;
+    fi ;
+    return ;
+}
+##
+##  And here's the first piece of verbose commentary:
+##
+prattle "----" 1
+prattle "This is pdfjam version ${version}."
 ##
 #########################################################################
 ##
